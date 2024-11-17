@@ -70,7 +70,7 @@ class Graph:
             for end, cost in neighbors:
                 nx_graph.add_edge(start, end, weight=cost)
 
-        # Get the solution path as a set of edges
+        # Get the solution path 
         solution_edges = [(solution_path[i], solution_path[i+1]) for i in range(len(solution_path) - 1)]
 
         # Get positions for the nodes in the graph
@@ -85,9 +85,9 @@ class Graph:
         # Highlight solution edges in red
         nx.draw_networkx_edges(nx_graph, pos, edgelist=solution_edges, edge_color="red", width=2.5, arrows=True)
 
-        # Draw edge weights (costs)
-        edge_labels = nx.get_edge_attributes(nx_graph, 'weight')
-        nx.draw_networkx_edge_labels(nx_graph, pos, edge_labels=edge_labels, font_size=12, font_color="blue")
+        # Draw edge with costs
+        cost = nx.get_edge_attributes(nx_graph, 'weight')
+        nx.draw_networkx_edge_labels(nx_graph, pos, edge_labels=cost, font_size=12, font_color="blue")
 
         # Display the graph
         plt.title("Graph with Solution Path Highlighted")
@@ -119,7 +119,7 @@ g.matrice_adjacance()
 
 # Perform A* search
 solution = g.a_star_search('S', 'G')
-solution_nodes = [node for node, cost in solution]  # Extract node names for visualization
+solution_nodes = [node for node, cost in solution]  # Extract node names for visualization without the cost 
 
 print("Solution Path:", solution_nodes)
 print("Cost of the Solution:", g.f_path(solution))
