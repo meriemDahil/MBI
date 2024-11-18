@@ -9,6 +9,7 @@ class Graph:
     def add_node(self, node):
         if node not in self.graph:
             self.graph[node] = []
+            self.heuristics[node] = 1
 
     def add_edge(self, start, end, cost):
         if start in self.graph:
@@ -60,6 +61,43 @@ class Graph:
                 queue.append(new_path)
 
         return []
+    
+    def search_bfs(self,start, end):
+        visited=[]
+        queue=[[start]]
+        while queue:
+            path = queue.pop(0)
+            node = path[-1]
+            if node in visited:
+                continue
+            visited.append(node)
+            if node == end:
+                return path
+            else:
+                adjacent_node = self.graph.get(node,[])
+                for neighbor, _ in adjacent_node:
+                    new_path = path.copy()
+                    new_path.append(neighbor)
+                    queue.append(new_path)
+
+
+    def dfs_algorithem(self,start,end):
+        visited =[]
+        stack=[[start]]
+        while stack:
+            path=stack.pop()
+            node=path[-1]
+            if node in visited:
+                continue
+            visited.append(node)
+            if node == end:
+                return path
+            else:
+                adjancy_node = self.graph.get(node,[])
+                for neighbor, _ in adjancy_node:
+                    new_path = list(path)
+                    new_path.append(neighbor)
+                    stack.append(new_path)
 
     def draw_solution(self):
         # Create a directed graph with networkx
@@ -108,6 +146,15 @@ g.add_edge('C', 'D', 1)
 g.add_edge('C', 'G', 2)
 g.add_edge('D', 'G', 3)
 
+
 g.draw_solution()
 g.matrice_adjacance()
+solution_bfs=g.search_bfs('S','G')
+print('solution with bsf is:', solution_bfs)
+solution_dfs=g.dfs_algorithem('S','G')
+print('solution with dfs is:', solution_dfs)
+solution_a_start=g.a_star_search('S','G')
+print('solution with A* is:', solution_a_start)
+print('the F-cost of the A* algorithem',g.f_path(solution_a_start))
+
 
