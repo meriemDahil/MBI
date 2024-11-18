@@ -1,3 +1,4 @@
+
 import matplotlib.pyplot as plt
 import networkx as nx
 
@@ -9,7 +10,7 @@ class Graph:
     def add_node(self, node):
         if node not in self.graph:
             self.graph[node] = []
-            self.heuristics[node] = 1
+            self.heuristics[node] = 0
 
     def add_edge(self, start, end, cost):
         if start in self.graph:
@@ -66,7 +67,7 @@ class Graph:
         visited=[]
         queue=[[start]]
         while queue:
-            path = queue.pop(0)
+            path = queue.pop(0) # queue
             node = path[-1]
             if node in visited:
                 continue
@@ -85,7 +86,7 @@ class Graph:
         visited =[]
         stack=[[start]]
         while stack:
-            path=stack.pop()
+            path=stack.pop() # dfs
             node=path[-1]
             if node in visited:
                 continue
@@ -99,7 +100,37 @@ class Graph:
                     new_path.append(neighbor)
                     stack.append(new_path)
 
-    def draw_solution(self):
+    def path_cost(self,path):
+        total_cost=0
+        for (node, cost) in path:
+            total_cost += cost 
+        return total_cost
+
+
+    def ucs_algorithem(self,start,end):
+        visited =[]
+        queue=[[(start,0)]]
+        while queue:
+            queue.sort(key=self.path_cost)
+            path=queue.pop(0) # dfs
+            node=path[-1][0]
+            if node in visited:
+                continue
+            visited.append(node)
+            if node == end:
+                return path
+            else:
+                adjancy_node = self.graph.get(node,[])
+                for neighbor, cost in self.graph.get(node, []):
+                    if neighbor not in visited:
+                        new_path = list(path)  
+                        new_path.append((neighbor, cost))
+                        queue.append(new_path)
+
+    def draw_solution(self, solution_path, title, color):
+    # Create a new figure and axis explicitly because dynamicaly the title doesnt display idk why
+        fig, ax = plt.subplots(figsize=(10, 8))
+
         # Create a directed graph with networkx
         nx_graph = nx.DiGraph()
 
@@ -109,26 +140,31 @@ class Graph:
                 nx_graph.add_edge(start, end, weight=cost)
 
         # Get the solution path 
-      
+        solution_edges = [(solution_path[i], solution_path[i+1]) for i in range(len(solution_path) - 1)] if solution_path else []
 
         # Get positions for the nodes in the graph
         pos = nx.spring_layout(nx_graph)
 
         # Draw the nodes
-        nx.draw(nx_graph, pos, with_labels=True, node_color="yellow", node_size=2000, font_size=15, font_weight="bold", arrowsize=17)
+        nx.draw(nx_graph, pos, ax=ax, with_labels=True, node_color="yellow", 
+                node_size=2000, font_size=15, font_weight="bold", arrowsize=15)
 
-        # Draw all edges in default black
-        nx.draw_networkx_edges(nx_graph, pos, edgelist=nx_graph.edges(), edge_color="black", arrows=True)
+        # default edge color is black
+        nx.draw_networkx_edges(nx_graph, pos, ax=ax, edgelist=nx_graph.edges(), 
+                                edge_color="black", arrows=True)
 
+        # Highlight solution edges 
+        nx.draw_networkx_edges(nx_graph, pos, ax=ax, edgelist=solution_edges, 
+                                edge_color=color, width=2.5, arrows=True)
 
-        # Draw edge with costs
         cost = nx.get_edge_attributes(nx_graph, 'weight')
-        nx.draw_networkx_edge_labels(nx_graph, pos, edge_labels=cost, font_size=12, font_color="blue")
+        nx.draw_networkx_edge_labels(nx_graph, pos, ax=ax, edge_labels=cost, 
+                                    font_size=12, font_color="blue")
 
-        # Display the graph
-        plt.title("Graph with Solution Path Highlighted")
-        plt.show()
-
+        ax.set_title(title, fontsize=16, fontweight="bold")
+        
+        plt.tight_layout()
+        plt.show(block=True)
 
 # Create the graph
 g = Graph()
@@ -147,14 +183,26 @@ g.add_edge('C', 'G', 2)
 g.add_edge('D', 'G', 3)
 
 
-g.draw_solution()
+g.draw_solution([],"Graph Visualization",'')
 g.matrice_adjacance()
 solution_bfs=g.search_bfs('S','G')
 print('solution with bsf is:', solution_bfs)
+g.draw_solution(solution_bfs,'Bfs Graph with Solution Path Highlighted','lime')
+
 solution_dfs=g.dfs_algorithem('S','G')
 print('solution with dfs is:', solution_dfs)
+g.draw_solution(solution_bfs,'dfs Graph with Solution Path Highlighted','aqua')
+
+solution_ucs=g.ucs_algorithem('S','G')
+print('solution with ucs is:', solution_ucs)
+print('The path cost of ucs is:',g.path_cost(solution_ucs))
+g.draw_solution(solution_bfs,'UCS Graph with Solution Path Highlighted','deeppink')
+
+
 solution_a_start=g.a_star_search('S','G')
+
 print('solution with A* is:', solution_a_start)
 print('the F-cost of the A* algorithem',g.f_path(solution_a_start))
+g.draw_solution(solution_bfs,'A* Graph with Solution Path Highlighted','red')
 
 
